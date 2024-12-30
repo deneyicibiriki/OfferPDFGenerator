@@ -5,10 +5,19 @@ import os
 
 # Flask uygulamasını doğrudan tanımlayın
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*.netlify.app"}})
+CORS(
+    app,
+    resources={r"/*": {"origins": "*.netlify.app"}},
+    supports_credentials=True,
+    allow_headers=["Content-Type", "Authorization", "Access-Control-Allow-Credentials"],
+    methods=["GET", "POST", "OPTIONS"]
+)
 
 @app.route('/generate-pdf', methods=['POST'])
 def generate_pdf_route():
+    if request.method == 'OPTIONS':
+        # CORS preflight response
+        return jsonify({'message': 'CORS preflight check passed'}), 200
     try:
         data = request.get_json()
 
