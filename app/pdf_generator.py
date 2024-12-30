@@ -16,6 +16,12 @@ def generate_pdf(data):
 
         # Generate reference number
         # Customer type için harita
+        customer_type = data.get("CustomerType", "None").strip()
+
+        # Eğer customer_type boşsa varsayılan "None" değerini kullan
+        if not customer_type:
+            customer_type = "None"
+
         customer_type_map = {
             "RegularRequester": "R",
             "ImportantRequester": "I",
@@ -24,11 +30,7 @@ def generate_pdf(data):
         }
 
         # Gelen customer_type'ı al
-        customer_type = data.get("CustomerType", "None").strip()
 
-        # Eğer customer_type boşsa varsayılan "None" değerini kullan
-        if not customer_type:
-            customer_type = "None"
 
         # Haritadan uygun karakteri seç (default: 'N')
         customer_character = customer_type_map.get(customer_type, "N")
@@ -254,6 +256,7 @@ def generate_pdf(data):
         print(f"[DEBUG] PDF URL: {pdf_url}")
 
         return pdf_url
+
 
     except Exception as e:
         print(f"[ERROR] PDF generation error: {e}")
