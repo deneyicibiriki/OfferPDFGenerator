@@ -5,12 +5,13 @@ import os
 
 # Flask uygulamasını doğrudan tanımlayın
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "https://candid-longma-2cc50d.netlify.app"}})
+CORS(app, resources={r"/*": {"origins": "https://candid-longma-2cc50d.netlify.app/"}})
+
 
 # CORS başlıklarını tüm yanıtlara ekleyen fonksiyon
 @app.after_request
 def add_cors_headers(response):
-    response.headers['Access-Control-Allow-Origin'] = 'https://candid-longma-2cc50d.netlify.app'
+    response.headers['Access-Control-Allow-Origin'] = 'https://candid-longma-2cc50d.netlify.app/'
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
     response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
     response.headers['Access-Control-Allow-Credentials'] = 'true'

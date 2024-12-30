@@ -252,7 +252,9 @@ def generate_pdf(data):
             raise FileNotFoundError(f"PDF file was not created at: {pdf_file}")
 
         #pdf_url = f"http://127.0.0.1:5000/static/generated_offers/{reference_number}.pdf"
-        pdf_url = f"{request.host_url}static/generated_offers/{reference_number}.pdf"
+        #pdf_url = f"{request.host_url}static/generated_offers/{reference_number}.pdf"
+        pdf_url = f"https://offerpdfgenerator.onrender.com/download-pdf/{os.path.basename(pdf_path)}"
+
         print(f"[DEBUG] PDF URL: {pdf_url}")
 
         return pdf_url
