@@ -15,26 +15,43 @@ def generate_pdf(data):
         print(f"[DEBUG] Creation date: {creation_date}, Valid until: {valid_until_date}")
 
         # Generate reference number
-        customer_type = data.get("CustomerType", "None").strip()
-        if not customer_type:
-            customer_type = "RegularRequester"
+        # Customer type için harita
+        customer_type_map = {
+            "RegularRequester": "R",
+            "ImportantRequester": "I",
+            "Dealer": "D",
+            "None": "N"  # Varsayılan değer
+        }
 
+        # Gelen customer_type'ı al
+        customer_type = data.get("CustomerType", "None").strip()
+
+        # Eğer customer_type boşsa varsayılan "None" değerini kullan
+        if not customer_type:
+            customer_type = "None"
+
+        # Haritadan uygun karakteri seç (default: 'N')
+        customer_character = customer_type_map.get(customer_type, "N")
+
+        # Klasörü oluştur
         output_folder = "static/generated_offers"
         os.makedirs(output_folder, exist_ok=True)
 
-        # Scan existing files to find the highest reference number
-        existing_files = os.listdir(output_folder)
-        pattern = re.compile(rf"PRE-{customer_type[0]}-MK(\d+).pdf")
+        # Var olan dosyaları taramak için regex
+        pattern = re.compile(rf"PRE-{customer_character}-MK(\d+).pdf")
+
+        # Mevcut en yüksek numarayı bul
         max_number = 0
+        existing_files = os.listdir(output_folder)
 
         for file_name in existing_files:
             match = pattern.match(file_name)
             if match:
                 max_number = max(max_number, int(match.group(1)))
 
-        # Determine new reference number
+        # Yeni referans numarası oluştur
         new_reference_no = f"{max_number + 1:04}"
-        reference_number = f"PRE-{customer_type[0]}-MK{new_reference_no}"
+        reference_number = f"PRE-{customer_character}-MK{new_reference_no}"
         print(f"[DEBUG] Generated reference number: {reference_number}")
 
         # Add extra details to data
