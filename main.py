@@ -5,7 +5,7 @@ import os
 
 # Flask uygulamasını doğrudan tanımlayın
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*.netlify.app"}})
 
 @app.route('/generate-pdf', methods=['POST'])
 def generate_pdf_route():
