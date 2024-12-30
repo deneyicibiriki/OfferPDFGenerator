@@ -1,0 +1,6 @@
+flask
+weasyprint
+jinja2
+fpdf
+flask-cors
+gunicorn
