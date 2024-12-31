@@ -38,7 +38,7 @@ def generate_pdf_route():
 
         # Eğer dosya başarıyla oluşturulduysa URL oluştur
         #pdf_url = f"{request.host_url}download-pdf/{os.path.basename(pdf_path)}"
-        pdf_url = f"https://offerpdfgenerator.onrender.com/download-pdf/{os.path.basename(pdf_path)}"
+        pdf_url = f"http://3.89.98.40/download-pdf/{os.path.basename(pdf_path)}"
 
         return jsonify({
             "pdf_generated": True,
