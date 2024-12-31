@@ -17,6 +17,10 @@ def add_cors_headers(response):
     response.headers['Access-Control-Allow-Credentials'] = 'true'
     return response
 
+@app.route('/', methods=['GET'])
+def home():
+    return jsonify({"message": "API is running!"}), 200
+
 @app.route('/generate-pdf', methods=['POST'])
 def generate_pdf_route():
     """if request.method == 'OPTIONS':
