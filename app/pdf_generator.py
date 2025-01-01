@@ -70,9 +70,9 @@ def generate_pdf(data):
 
         # Add UTF-8 font support
         try:
-            pdf.add_font("DejaVu", "", "static/fonts/DejaVuSans.ttf", uni=True)
-            pdf.add_font("DejaVu", "I", "static/fonts/DejaVuSans-Oblique.ttf", uni=True)
-            pdf.add_font("DejaVu", "B", "static/fonts/DejaVuSans-Bold.ttf", uni=True)
+            pdf.add_font("DejaVu", fname="static/fonts/DejaVuSans.ttf", uni=True)
+            pdf.add_font("DejaVu", style="I", fname="static/fonts/DejaVuSans-Oblique.ttf", uni=True)
+            pdf.add_font("DejaVu", style="B", fname="static/fonts/DejaVuSans-Bold.ttf", uni=True)
             print("[DEBUG] Fonts successfully added.")
         except Exception as e:
             print(f"[ERROR] Font addition error: {e}")
