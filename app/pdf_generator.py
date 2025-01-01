@@ -1,10 +1,8 @@
-from fpdf import FPDF
 import os
 import datetime
 import re
-from fpdf.errors import FPDFException
+from fpdf import FPDF
 
-from flask import request
 
 
 def generate_pdf(data):

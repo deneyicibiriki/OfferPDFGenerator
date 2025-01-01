@@ -2,5 +2,6 @@ flask
 weasyprint
 jinja2
 flask-cors
+fpdf2
 gunicorn
 fpdf
