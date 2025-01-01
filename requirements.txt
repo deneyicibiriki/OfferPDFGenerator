@@ -4,3 +4,4 @@ jinja2
 fpdf2
 flask-cors
 gunicorn
+fpdf
