@@ -79,7 +79,7 @@ def generate_pdf(data):
 
         # Add header
         # Logo and Company Details on the left
-        static_path = os.path.join(os.getcwd(), 'static/assets/logo.png')
+        """static_path = os.path.join(os.getcwd(), 'static/assets/logo.png')
         print("[DEBUG] Logo is being searched.")
         if os.path.exists(static_path):
             print(f"[DEBUG] Logo dosya yolu bulundu: {static_path}")
@@ -95,7 +95,7 @@ def generate_pdf(data):
         except Exception as e:
             print(f"[ERROR] Logo yüklenirken hata oluştu: {e}")
             import traceback
-            traceback.print_exc()  # Daha detaylı traceback
+            traceback.print_exc()  # Daha detaylı traceback"""
 
         # F.Reg.
         pdf.set_font("DejaVu", "B", size=10)  # Bold font for label
