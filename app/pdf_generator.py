@@ -98,8 +98,6 @@ def generate_pdf(data):
             pdf.set_xy(10, 50)  # Position for text below the logo
             print("[DEBUG] Logo başarıyla yüklendi.")
 
-        except FPDFException as e:
-            print(f"[ERROR] FPDFException: {e}")
 
         except Exception as e:
             print(f"[ERROR] Logo yüklenirken hata oluştu: {e}")
