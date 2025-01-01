@@ -1,8 +1,8 @@
+from fpdf import FPDF
 import os
 import datetime
 import re
-from fpdf import FPDF
-
+from flask import request
 
 
 def generate_pdf(data):
@@ -68,7 +68,6 @@ def generate_pdf(data):
 
         # Add UTF-8 font support
         try:
-            # DejaVu fontlarını ekleme
             pdf.add_font("DejaVu", "", "static/fonts/DejaVuSans.ttf", uni=True)
             pdf.add_font("DejaVu", "I", "static/fonts/DejaVuSans-Oblique.ttf", uni=True)
             pdf.add_font("DejaVu", "B", "static/fonts/DejaVuSans-Bold.ttf", uni=True)
@@ -82,21 +81,16 @@ def generate_pdf(data):
         # Logo and Company Details on the left
         static_path = os.path.join(os.getcwd(), 'static/assets/logo.png')
         print("[DEBUG] Logo is being searched.")
-
         if os.path.exists(static_path):
             print(f"[DEBUG] Logo dosya yolu bulundu: {static_path}")
         else:
             print(f"[ERROR] Logo dosya yolu bulunamadı: {static_path}")
 
         try:
-            print(f"[DEBUG] File size: {os.path.getsize(static_path)} bytes")
-            with open(static_path, 'rb') as f:
-                print(f"[DEBUG] File opened successfully: {f.read(10)}")  # İlk 10 byte okunuyor
+            # Logo yükleme
+            print(f"[ERROR] inside the try loop for logo")
             pdf.image(static_path, x=10, y=8, w=50)  # Logo büyütüldü (w=50)
             pdf.set_xy(10, 50)  # Position for text below the logo
-            print("[DEBUG] Logo başarıyla yüklendi.")
-
-
         except Exception as e:
             print(f"[ERROR] Logo yüklenirken hata oluştu: {e}")
 
@@ -279,6 +273,5 @@ def generate_pdf(data):
 
 
     except Exception as e:
-
         print(f"[ERROR] PDF generation error: {e}")
         raise
