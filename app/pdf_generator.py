@@ -82,9 +82,14 @@ def generate_pdf(data):
         static_path = os.path.join(os.getcwd(), 'static/assets/logo.png')
         print("[DEBUG] Logo is being searched.")
 
+        if os.path.exists(static_path):
+            print(f"[DEBUG] Logo dosya yolu bulundu: {static_path}")
+        else:
+            print(f"[ERROR] Logo dosya yolu bulunamadı: {static_path}")
+
         try:
             # Logo yükleme
-            print(f"[ERROR] inside the try loop for logo")
+            print(f"[DEBUG] inside the try loop for logo")
             pdf.image(static_path, x=10, y=8, w=50)  # Logo büyütüldü (w=50)
             pdf.set_xy(10, 50)  # Position for text below the logo
         except Exception as e:
