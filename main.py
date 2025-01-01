@@ -60,7 +60,11 @@ def generate_pdf_route():
 @app.route('/download-pdf/<filename>', methods=['GET'])
 def download_pdf(filename):
     try:
-        # Tam dosya yolu
+        # PDF dosya adının sonuna .pdf ekle
+        if not filename.endswith('.pdf'):
+            filename += '.pdf'
+
+        # Dosya yolunu oluştur
         file_path = os.path.join(os.getcwd(), 'static/generated_offers', filename)
         print(f"[DEBUG] PDF dosya yolu: {file_path}")
 
@@ -70,6 +74,7 @@ def download_pdf(filename):
             return jsonify({"error": "File not found"}), 404
 
         # Dosyayı indirilebilir olarak gönder
+        print(f"[DEBUG] Dosya indiriliyor: {file_path}")
         return send_file(
             file_path,
             as_attachment=True,
