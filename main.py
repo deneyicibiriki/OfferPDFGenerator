@@ -21,6 +21,12 @@ def add_cors_headers(response):
 def home():
     return jsonify({"message": "API is running!"}), 200
 
+@app.errorhandler(Exception)
+def handle_exception(e):
+    # Global bir hata yakalayıcı
+    print(f"[ERROR] Uygulama hatası: {e}")
+    return jsonify({"error": str(e)}), 500
+
 @app.route('/generate-pdf', methods=['POST'])
 def generate_pdf_route():
     """if request.method == 'OPTIONS':

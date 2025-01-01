@@ -87,11 +87,13 @@ def generate_pdf(data):
 
         try:
             # Logo yükleme
-            print(f"[ERROR] inside the try loop for logo")
+            print(f"[DEBUG] Logo yükleniyor: {static_path}")
             pdf.image(static_path, x=10, y=8, w=50)  # Logo büyütüldü (w=50)
             pdf.set_xy(10, 50)  # Position for text below the logo
+        except FileNotFoundError:
+            print(f"[ERROR] Dosya bulunamadı: {static_path}")
         except Exception as e:
-            print(f"[ERROR] Logo yüklenirken hata oluştu: {e}")
+            print(f"[ERROR] Beklenmeyen hata: {e}")
 
         # F.Reg.
         pdf.set_font("DejaVu", "B", size=10)  # Bold font for label
