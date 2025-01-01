@@ -60,12 +60,16 @@ def generate_pdf_route():
 @app.route('/download-pdf/<filename>', methods=['GET'])
 def download_pdf(filename):
     try:
-        file_path = os.path.join('static/generated_offers', filename)
+        # Tam dosya yolu
+        file_path = os.path.join(os.getcwd(), 'static/generated_offers', filename)
+        print(f"[DEBUG] PDF dosya yolu: {file_path}")
 
         # Eğer dosya yoksa hata döndür
         if not os.path.exists(file_path):
+            print(f"[ERROR] Dosya bulunamadı: {file_path}")
             return jsonify({"error": "File not found"}), 404
 
+        # Dosyayı indirilebilir olarak gönder
         return send_file(
             file_path,
             as_attachment=True,
@@ -73,6 +77,7 @@ def download_pdf(filename):
             mimetype="application/pdf"
         )
     except Exception as e:
+        print(f"[ERROR] PDF indirme sırasında hata: {e}")
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
 if __name__ == '__main__':
