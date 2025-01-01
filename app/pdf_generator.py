@@ -2,6 +2,8 @@ from fpdf import FPDF
 import os
 import datetime
 import re
+from fpdf.errors import FPDFException
+
 from flask import request
 
 
@@ -88,10 +90,16 @@ def generate_pdf(data):
             print(f"[ERROR] Logo dosya yolu bulunamadı: {static_path}")
 
         try:
-            # Logo yükleme
-            print(f"[DEBUG] inside the try loop for logo")
+            print(f"[DEBUG] File size: {os.path.getsize(static_path)} bytes")
+            with open(static_path, 'rb') as f:
+                print(f"[DEBUG] File opened successfully: {f.read(10)}")  # İlk 10 byte okunuyor
             pdf.image(static_path, x=10, y=8, w=50)  # Logo büyütüldü (w=50)
             pdf.set_xy(10, 50)  # Position for text below the logo
+            print("[DEBUG] Logo başarıyla yüklendi.")
+
+        except FPDFException as e:
+            print(f"[ERROR] FPDFException: {e}")
+
         except Exception as e:
             print(f"[ERROR] Logo yüklenirken hata oluştu: {e}")
 
