@@ -5,3 +5,4 @@ flask-cors
 gunicorn
 fpdf
 fpdf2
+werkzeug

@@ -117,7 +117,7 @@ def generate_pdf(data):
         pdf.cell(20, 5, txt="Website:", align="L", border=0)  # Label
         pdf.set_font("DejaVu", size=10)  # Regular font for value
         pdf.set_text_color(0, 0, 255)  # Blue color for clickable link
-        pdf.cell(0, 5, txt="matkuling.com", align="L", ln=True, link="http://matkuling.com",
+        pdf.cell(0, 5, txt="matkuling.com", align="L", ln=True, link="https://matkuling.com",
                  border=0)  # Clickable website
         pdf.set_text_color(0, 0, 0)  # Reset text color
 
@@ -268,7 +268,7 @@ def generate_pdf(data):
 
         #pdf_url = f"http://127.0.0.1:5000/static/generated_offers/{reference_number}.pdf"
         #pdf_url = f"{request.host_url}static/generated_offers/{reference_number}.pdf"
-        pdf_url = f"http://3.89.98.40/download-pdf/{reference_number}"
+        pdf_url = f"https://apideneme.viselab.net/download-pdf/{reference_number}"
 
         print(f"[DEBUG] PDF URL: {pdf_url}")
 
