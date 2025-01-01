@@ -79,8 +79,14 @@ def generate_pdf(data):
 
         # Add header
         # Logo and Company Details on the left
-        pdf.image("static/assets/logo.png", x=10, y=8, w=50)  # Logo büyütüldü (w=50)
-        pdf.set_xy(10, 50)  # Position for text below the logo
+        static_path = os.path.join(os.getcwd(), 'static/assets/logo.png')
+
+        try:
+            # Logo yükleme
+            pdf.image(static_path, x=10, y=8, w=50)  # Logo büyütüldü (w=50)
+            pdf.set_xy(10, 50)  # Position for text below the logo
+        except Exception as e:
+            print(f"[ERROR] Logo yüklenirken hata oluştu: {e}")
 
         # F.Reg.
         pdf.set_font("DejaVu", "B", size=10)  # Bold font for label
@@ -253,7 +259,7 @@ def generate_pdf(data):
 
         #pdf_url = f"http://127.0.0.1:5000/static/generated_offers/{reference_number}.pdf"
         #pdf_url = f"{request.host_url}static/generated_offers/{reference_number}.pdf"
-        pdf_url = f"https://offerpdfgenerator.onrender.com/download-pdf/{reference_number}"
+        pdf_url = f"http://3.89.98.40/download-pdf/{reference_number}"
 
         print(f"[DEBUG] PDF URL: {pdf_url}")
 
