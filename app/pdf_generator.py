@@ -80,9 +80,11 @@ def generate_pdf(data):
         # Add header
         # Logo and Company Details on the left
         static_path = os.path.join(os.getcwd(), 'static/assets/logo.png')
+        print("[DEBUG] Logo is being searched.")
 
         try:
             # Logo yükleme
+            print(f"[ERROR] inside the try loop for logo")
             pdf.image(static_path, x=10, y=8, w=50)  # Logo büyütüldü (w=50)
             pdf.set_xy(10, 50)  # Position for text below the logo
         except Exception as e:
