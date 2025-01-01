@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 from app.pdf_generator import generate_pdf
 import os
+import traceback
 
 # Flask uygulamasını doğrudan tanımlayın
 app = Flask(__name__)
@@ -23,8 +24,9 @@ def home():
 
 @app.errorhandler(Exception)
 def handle_exception(e):
-    # Global bir hata yakalayıcı
     print(f"[ERROR] Uygulama hatası: {e}")
+    print("[TRACEBACK]")
+    traceback.print_exc()  # Detaylı traceback loglama
     return jsonify({"error": str(e)}), 500
 
 @app.route('/generate-pdf', methods=['POST'])

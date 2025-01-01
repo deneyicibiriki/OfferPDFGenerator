@@ -4,6 +4,7 @@ import datetime
 import re
 
 
+
 def generate_pdf(data):
     print("[DEBUG] generate_pdf function called.")
 
@@ -86,14 +87,15 @@ def generate_pdf(data):
             print(f"[ERROR] Logo dosya yolu bulunamadı: {static_path}")
 
         try:
-            # Logo yükleme
             print(f"[DEBUG] Logo yükleniyor: {static_path}")
-            pdf.image(static_path, x=10, y=8, w=50)  # Logo büyütüldü (w=50)
+            pdf.image(static_path, x=10, y=8, w=50)  # Logo büyütüldü
             pdf.set_xy(10, 50)  # Position for text below the logo
         except FileNotFoundError:
             print(f"[ERROR] Dosya bulunamadı: {static_path}")
         except Exception as e:
-            print(f"[ERROR] Beklenmeyen hata: {e}")
+            print(f"[ERROR] Logo yüklenirken hata oluştu: {e}")
+            import traceback
+            traceback.print_exc()  # Daha detaylı traceback
 
         # F.Reg.
         pdf.set_font("DejaVu", "B", size=10)  # Bold font for label
@@ -274,5 +276,6 @@ def generate_pdf(data):
 
 
     except Exception as e:
+
         print(f"[ERROR] PDF generation error: {e}")
         raise
