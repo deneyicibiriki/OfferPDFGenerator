@@ -105,26 +105,17 @@ def generate_pdf(data):
         # Add header
         # Logo and Company Details on the left
         try:
-            static_path = os.path.join(os.getcwd(), 'static/assets/logo.png')
-            print(f"[DEBUG] Logo tam yolu: {static_path}")
+            # URL üzerinden logo ekleme
+            logo_url = "https://apideneme.viselab.net/static/assets/logo.png"
+            print(f"[DEBUG] Logo URL yükleniyor: {logo_url}")
 
-            # Dosyanın mevcut olduğunu bir kez daha kontrol edelim
-            if os.path.exists(static_path):
-                print("[DEBUG] Logo dosyası mevcut. PDF'e ekleniyor...")
-            else:
-                print("[ERROR] Logo dosyası bulunamadı. PDF'e eklenemiyor.")
-                return  # Eğer dosya yoksa işlemi durdur.
-
-            # PDF'e logo ekle
-            pdf.image(static_path, x=10, y=8, w=50)  # Logo büyütüldü
+            # URL üzerinden resmi eklemek için
+            pdf.image(logo_url, x=10, y=8, w=50)  # Logo büyütüldü
             pdf.set_xy(10, 50)  # Position for text below the logo
-            print("[DEBUG] Logo başarıyla PDF'e eklendi.")
-        except FileNotFoundError as fnf_error:
-            print(f"[ERROR] Dosya bulunamadı hatası: {fnf_error}")
+
+            print("[DEBUG] Logo başarıyla eklendi.")
         except Exception as e:
-            print(f"[ERROR] Logo yüklenirken genel hata oluştu: {e}")
-            import traceback
-            traceback.print_exc()
+            print(f"[ERROR] Logo eklenirken hata oluştu: {e}")
 
         """static_path = os.path.join(os.getcwd(), 'static/assets/logo.png')
         print("[DEBUG] Logo is being searched.")
