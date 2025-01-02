@@ -20,16 +20,14 @@ def create_app():
                 return jsonify({"error": "Invalid data provided"}), 400
 
             # PDF oluştur
-            pdf_path = generate_pdf(data)  # Dosya yolu: "static/generated_offers/file.pdf"
-            #pdf_path = "static/generated_offers/test.pdf"
-
-            # WebGL için tam URL oluştur
-            #pdf_url = f"http://127.0.0.1:5000/{pdf_path.replace('static/', '')}"
+            print("[DEBUG] JSON Verisi Alındı:", data)
+            pdf_path = generate_pdf(data)
+            pdf_path = generate_pdf(data)
 
             if pdf_path.startswith("http"):
                 pdf_url = pdf_path  # Eğer pdf_path tam URL içeriyorsa direkt kullan
             else:
-                pdf_url = f"http://127.0.0.1:5000/{pdf_path.lstrip('/')}"  # Baştaki "/"'yi kaldır
+                pdf_url = f"https://apideneme.viselab.net/{pdf_path.lstrip('/')}"  # Baştaki "/"'yi kaldır
 
             return jsonify({
                 "pdf_generated": True,
@@ -40,6 +38,7 @@ def create_app():
         except Exception as e:
             # Hata durumunda loglama ve hata mesajı
             return jsonify({"error": f"Hata oluştu: {str(e)}"}), 500
+
 
 
     return app

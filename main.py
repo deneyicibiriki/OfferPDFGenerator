@@ -37,8 +37,14 @@ def generate_pdf_route():
             return jsonify({"error": "Invalid data provided"}), 400
 
         # PDF oluştur
+        print("[DEBUG] JSON Verisi Alındı:", data)
         pdf_path = generate_pdf(data)
 
+        if not pdf_path:
+            print("[ERROR] generate_pdf fonksiyonu boş değer döndürdü.")
+            return jsonify({"error": "PDF oluşturulamadı"}), 500
+
+            # Eğer dosya mevcut değilse hata ver
         if not os.path.exists(pdf_path):
             print(f"[ERROR] PDF oluşturulamadı: {pdf_path}")
             return jsonify({"error": "PDF oluşturulamadı"}), 500

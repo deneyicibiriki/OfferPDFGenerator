@@ -76,9 +76,10 @@ def generate_pdf(data):
         # Yeni referans numarası oluştur
         new_reference_no = f"{max_number + 1:04}"
         reference_number = f"PRE-{customer_character}-MK{new_reference_no}"
+        output_path = f"/home/ec2-user/OfferPDFGenerator/static/generated_offers/{reference_number}.pdf"
+        print(f"[DEBUG] PDF oluşturma başlıyor: {output_path}")
         print(f"[DEBUG] Generated reference number: {reference_number}")
-        #pdf_filename = f"{reference_number}.pdf"
-        #file_path = os.path.join(os.getcwd(), 'static/generated_offers', pdf_filename)
+
 
         # Add extra details to data
         data["referenceNumber"] = reference_number
@@ -297,11 +298,16 @@ def generate_pdf(data):
         #pdf_url = f"{request.host_url}static/generated_offers/{reference_number}.pdf"
         pdf_url = f"https://apideneme.viselab.net/download-pdf/{reference_number}"
 
-        print(f"[DEBUG] PDF URL: {pdf_url}")
+        #print(f"[DEBUG] PDF URL: {pdf_url}")
         #print(f"[DEBUG] PDF dosyası oluşturuldu: {file_path}")
         #return file_path
+        #return pdf_url
 
-        return pdf_url
+        pdf.output(output_path)
+        print(f"[DEBUG] PDF başarıyla oluşturuldu: {output_path}")
+        return output_path
+
+
 
 
 
