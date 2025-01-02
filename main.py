@@ -102,32 +102,25 @@ def generate_pdf_route():
 def secure_download():
     try:
         token = request.args.get("token")
+        print(f"[DEBUG] Token received: {token}")
 
         # Token kontrolü
-        if not token or token not in download_tokens:
-            return """
-            <html>
-                <body>
-                    <h2>Invalid or expired token</h2>
-                    <p>The requested link is no longer valid. Please generate a new PDF to download.</p>
-                </body>
-            </html>
-            """, 403
+        if not token:
+            print("[ERROR] Token is missing")
+            return jsonify({"error": "Invalid or expired token"}), 403
+
+        if token not in download_tokens:
+            print(f"[ERROR] Token not found: {token}")
+            return jsonify({"error": "Invalid or expired token"}), 403
 
         token_data = download_tokens[token]
         file_path = token_data["file_path"]
 
         # Token süresi dolmuş mu?
         if time.time() > token_data["expires_at"]:
+            print("[ERROR] Token expired")
             del download_tokens[token]
-            return """
-            <html>
-                <body>
-                    <h2>Token expired</h2>
-                    <p>The requested link has expired. Please generate a new PDF to download.</p>
-                </body>
-            </html>
-            """, 403
+            return jsonify({"error": "Token expired"}), 403
 
         # Dosya adı ve download linki
         filename = os.path.basename(file_path)
@@ -139,27 +132,20 @@ def secure_download():
             <head>
                 <title>Downloading...</title>
                 <script>
-                    // 1 saniye içinde indirmenin başlaması
                     setTimeout(function() {{
                         window.location.href = "{download_link}";
                     }}, 1000);
                 </script>
             </head>
             <body>
-                <h2>Your file is downloading...</h2>
-                <p>If the download doesn't start automatically, <a href="{download_link}">click here</a>.</p>
+                <h2>Downloading your file...</h2>
+                <p>This link will expire in 60 seconds. If the download doesn't start automatically, <a href="{download_link}">click here</a>.</p>
             </body>
         </html>
         """
     except Exception as e:
-        return f"""
-        <html>
-            <body>
-                <h2>An error occurred</h2>
-                <p>{str(e)}</p>
-            </body>
-        </html>
-        """, 500
+        print(f"[ERROR] An error occurred in secure_download: {e}")
+        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
 @app.route('/download-pdf/<filename>', methods=['GET'])
 def download_pdf(filename):
