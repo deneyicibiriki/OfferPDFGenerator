@@ -83,6 +83,9 @@ def download_pdf(filename):
             download_name=filename,
             mimetype="application/pdf"
         )
+        print(f"[DEBUG] File sent successfully: {file_path}")
+        return response
+
 
     except Exception as e:
         print(f"[ERROR] PDF indirme sırasında hata: {e}")
