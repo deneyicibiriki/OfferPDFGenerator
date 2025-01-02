@@ -5,7 +5,6 @@ import os
 import traceback
 import uuid
 import time
-#import threading
 
 
 # Flask uygulamasını doğrudan tanımlayın
@@ -67,46 +66,46 @@ def generate_pdf_route():
     except Exception as e:
         return jsonify({"error": f"Hata oluştu: {str(e)}"}), 500
 
-@app.route('/secure-download/<filename>', methods=['GET'])
-def secure_download(filename):
+@app.route('/secure-download', methods=['GET'])
+def secure_download():
     try:
-        # Dosya adının sonuna .pdf ekleyin
-        if not filename.endswith('.pdf'):
-            filename += '.pdf'
+        token = request.args.get("token")
 
-        # Dosya yolunu kontrol edin
-        file_path = os.path.join(os.getcwd(), 'static/generated_offers', filename)
-        if not os.path.exists(file_path):
-            return jsonify({"error": "File not found"}), 404
+        # Token kontrolü
+        if not token or token not in download_tokens:
+            return jsonify({"error": "Invalid or expired token"}), 403
 
-        # HTML yanıt döndür (Yeni sekmede mesaj göstermek ve otomatik indirme başlatmak için)
+        token_data = download_tokens[token]
+        file_path = token_data["file_path"]
+
+        # Token süresi dolmuş mu?
+        if time.time() > token_data["expires_at"]:
+            del download_tokens[token]
+            return jsonify({"error": "Token expired"}), 403
+
+        # Dosya adı ve download linki
+        filename = os.path.basename(file_path)
+        download_link = f"https://apideneme.viselab.net/download-pdf/{filename}"
+
+        # HTML mesajı döndür
         return f"""
-        <!DOCTYPE html>
         <html>
-        <head>
-            <title>Downloading...</title>
-            <style>
-                body {{
-                    font-family: Arial, sans-serif;
-                    text-align: center;
-                    margin-top: 50px;
-                }}
-            </style>
-        </head>
-        <body>
-            <h2>Downloading your file...</h2>
-            <p>If the download does not start automatically, <a href="/static/generated_offers/{filename}" download>click here</a>.</p>
-            <script>
-                setTimeout(function() {{
-                    window.location.href = "/static/generated_offers/{filename}";
-                }}, 1000);
-            </script>
-        </body>
+            <head>
+                <title>Downloading...</title>
+                <script>
+                    setTimeout(function() {{
+                        window.location.href = "{download_link}";
+                    }}, 1000);
+                </script>
+            </head>
+            <body>
+                <h2>Downloading your file...</h2>
+                <p>This link will expire in 60 seconds. If the download doesn't start automatically, <a href="{download_link}">click here</a>.</p>
+            </body>
         </html>
         """
     except Exception as e:
-        print(f"[ERROR] Error during secure download: {e}")
-        return jsonify({"error": "An error occurred"}), 500
+        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
 @app.route('/download-pdf/<filename>', methods=['GET'])
 def download_pdf(filename):
