@@ -252,9 +252,11 @@ def generate_pdf(data):
         total_price_text = ""
 
         # Eğer PDFOfferPrice değerlerinden biri 0'dan büyükse, metni ayarla
-        if any(float(item.get("PDFOfferPrice", "0").replace("€", "").strip() or "0") > 0 for item in
-               data.get("items", [])):
-            total_price_text = f"Total Price: {total_price:.2f} €  "
+        if any(
+                float(item.get("PDFOfferPrice", "0").replace("€", "").replace(",", ".").strip() or "0") > 0
+                for item in data.get("items", [])
+        ):
+            total_price_text = f"Total Price: {total_price:.2f} €"
 
         # Text yazdırma işlemi
         pdf.ln(1)
