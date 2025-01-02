@@ -90,8 +90,8 @@ def generate_pdf_route():
         print(f"[ERROR] generate_pdf hatası: {e}")
         return jsonify({"error": f"Hata oluştu: {str(e)}"}), 500
 
-@app.route('/secure-download/<token>', methods=['GET'])
-def secure_download(token):
+@app.route('/secure-download', methods=['GET'])
+def secure_download():
     try:
         token = request.args.get("token")
         print(f"[DEBUG] Token received: {token}")
@@ -125,7 +125,7 @@ def secure_download(token):
         """
     except Exception as e:
         print(f"[ERROR] An error occurred in secure_download: {e}")
-        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
+        return jsonify({"error": f"An error occurred in secure download: {str(e)}"}), 500
 
 @app.route('/download-pdf/<filename>', methods=['GET'])
 def download_pdf(filename):
@@ -153,7 +153,7 @@ def download_pdf(filename):
     except Exception as e:
         print(f"[ERROR] PDF indirme sırasında hata: {e}")
         traceback.print_exc()
-        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
+        return jsonify({"error": f"An error occurred in dowload pdf: {str(e)}"}), 500
 
 if __name__ == '__main__':
     #threading.Thread(target=clean_expired_tokens, daemon=True).start()
