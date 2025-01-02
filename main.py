@@ -113,11 +113,8 @@ RedirectHTTPToHTTPS().start()
 
 
 if __name__ == '__main__':
-    RedirectHTTPToHTTPS().start()
+    RedirectHTTPToHTTPS().start()  # HTTP'den HTTPS'e yönlendirme yapar
 
-    # Flask uygulamasını HTTPS üzerinde çalıştır (Port 443)
-    port = 443
-    app.run(debug=True, host='0.0.0.0', port=port, ssl_context=(
-        '/etc/letsencrypt/live/apideneme.viselab.net/fullchain.pem',  # Sertifika dosyası
-        '/etc/letsencrypt/live/apideneme.viselab.net/privkey.pem'  # Özel anahtar dosyası
-    ))
+    # Flask uygulamasını HTTPS olmadan çalıştır (Nginx yönetecek)
+    port = 8443  # Nginx, talepleri bu porta yönlendirecek
+    app.run(debug=True, host='0.0.0.0', port=port)
