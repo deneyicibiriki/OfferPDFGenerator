@@ -33,49 +33,52 @@ def generate_pdf_route():
     try:
         data = request.get_json()
 
-        # Eksik veri kontrolü
         if not data or not data.get("items", []):
             return jsonify({"error": "Invalid data provided"}), 400
 
         # PDF oluştur
-        pdf_path = generate_pdf(data)  # PDF dosya yolu
+        pdf_path = generate_pdf(data)
 
-        # Eğer dosya başarıyla oluşturulduysa URL oluştur
+        if not os.path.exists(pdf_path):
+            print(f"[ERROR] PDF oluşturulamadı: {pdf_path}")
+            return jsonify({"error": "PDF oluşturulamadı"}), 500
+
+        # PDF URL oluştur
         pdf_url = f"https://apideneme.viselab.net/download-pdf/{os.path.basename(pdf_path)}"
+        print(f"[DEBUG] Oluşturulan PDF URL: {pdf_url}")
 
         return jsonify({
             "pdf_generated": True,
             "message": "PDF başarıyla oluşturuldu.",
-            "pdf_url": pdf_url  # Kullanıcı için indirme bağlantısı
+            "pdf_url": pdf_url
         }), 200
 
     except Exception as e:
+        print(f"[ERROR] generate_pdf hatası: {e}")
         return jsonify({"error": f"Hata oluştu: {str(e)}"}), 500
+
 
 @app.route('/download-pdf/<filename>', methods=['GET'])
 def download_pdf(filename):
     try:
-        # PDF dosya adının sonuna .pdf ekle
         if not filename.endswith('.pdf'):
             filename += '.pdf'
 
-        # Dosya yolunu oluştur
         file_path = os.path.join(os.getcwd(), 'static/generated_offers', filename)
-        print(f"[DEBUG] PDF dosya yolu: {file_path}")
-
-        # Eğer dosya yoksa hata döndür
         if not os.path.exists(file_path):
             print(f"[ERROR] Dosya bulunamadı: {file_path}")
             return jsonify({"error": "File not found"}), 404
 
-        # Dosyayı indirilebilir olarak gönder
         print(f"[DEBUG] Dosya indiriliyor: {file_path}")
-        return send_file(
+        response = send_file(
             file_path,
             as_attachment=True,
             download_name=filename,
             mimetype="application/pdf"
         )
+        response.headers["Content-Disposition"] = f"attachment; filename={filename}"
+        return response
+
     except Exception as e:
         print(f"[ERROR] PDF indirme sırasında hata: {e}")
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
