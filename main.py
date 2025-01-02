@@ -5,7 +5,7 @@ import os
 import traceback
 import uuid
 import time
-import threading
+#import threading
 
 
 # Flask uygulamasını doğrudan tanımlayın
@@ -21,6 +21,7 @@ def generate_unique_token():
         if token not in download_tokens:
             return token
 
+"""
 def clean_expired_tokens():
     while True:
         current_time = time.time()
@@ -31,6 +32,8 @@ def clean_expired_tokens():
 
         print(f"[DEBUG] Expired tokens cleaned. Remaining tokens: {len(download_tokens)}")
         time.sleep(3600)  # Her saat başı kontrol eder
+"""
+
 
 # CORS başlıklarını tüm yanıtlara ekleyen fonksiyon
 @app.after_request
@@ -67,11 +70,10 @@ def generate_pdf_route():
             print("[ERROR] generate_pdf function returned None.")
             return jsonify({"error": "PDF oluşturulamadı"}), 500
 
-        # Benzersiz token oluştur ve kaydet
+        # Benzersiz token oluştur ve kaydet (expire kaldırıldı)
         token = generate_unique_token()
         download_tokens[token] = {
             "file_path": pdf_path,
-            "expires_at": time.time() + 24 * 3600  # 24 saat geçerli
         }
 
         print(f"[DEBUG] Oluşturulan PDF Token ve Path: {token}, {pdf_path}")
@@ -97,17 +99,9 @@ def secure_download():
         # Token kontrolü
         if not token or token not in download_tokens:
             print(f"[ERROR] Token invalid or missing: {token}")
-            return jsonify({"error": "Invalid or expired token"}), 403
+            return jsonify({"error": "Invalid token"}), 403
 
         token_data = download_tokens[token]
-
-        # Token süresi dolmuş mu?
-        if time.time() > token_data["expires_at"]:
-            print("[ERROR] Token expired")
-            del download_tokens[token]
-            return jsonify({"error": "Token expired"}), 403
-
-        # Dosya adı ve download linki
         file_path = token_data["file_path"]
         filename = os.path.basename(file_path)
         download_link = f"https://apideneme.viselab.net/download-pdf/{filename}"
@@ -125,7 +119,7 @@ def secure_download():
             </head>
             <body>
                 <h2>Downloading your file...</h2>
-                <p>This link will expire in 24 hours. If the download doesn't start automatically, <a href="{download_link}">click here</a>.</p>
+                <p>If the download doesn't start automatically, <a href="{download_link}">click here</a>.</p>
             </body>
         </html>
         """
@@ -162,7 +156,7 @@ def download_pdf(filename):
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
 if __name__ == '__main__':
-    threading.Thread(target=clean_expired_tokens, daemon=True).start()
+    #threading.Thread(target=clean_expired_tokens, daemon=True).start()
     # Flask uygulamasını HTTPS olmadan çalıştır (Nginx yönetecek)
     port = 8443  # Nginx talepleri bu porta yönlendirecek
     app.run(debug=True, host='0.0.0.0', port=port)
