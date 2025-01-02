@@ -5,11 +5,31 @@ import os
 import traceback
 import uuid
 import time
+import threading
 
 
 # Flask uygulamasını doğrudan tanımlayın
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
+
+download_tokens = {}
+
+def generate_unique_token():
+    while True:
+        token = str(uuid.uuid4())
+        if token not in download_tokens:
+            return token
+
+def clean_expired_tokens():
+    while True:
+        current_time = time.time()
+        expired_tokens = [token for token, data in download_tokens.items() if current_time > data["expires_at"]]
+
+        for token in expired_tokens:
+            del download_tokens[token]
+
+        print(f"[DEBUG] Expired tokens cleaned. Remaining tokens: {len(download_tokens)}")
+        time.sleep(60)  # Her 60 saniyede bir kontrol eder
 
 # CORS başlıklarını tüm yanıtlara ekleyen fonksiyon
 @app.after_request
@@ -31,8 +51,6 @@ def handle_exception(e):
     traceback.print_exc()  # Detaylı traceback loglama
     return jsonify({"error": str(e)}), 500
 
-download_tokens = {}
-
 @app.route('/generate-pdf', methods=['POST'])
 def generate_pdf_route():
     try:
@@ -45,7 +63,7 @@ def generate_pdf_route():
         print("[DEBUG] JSON Verisi Alındı:", data)
         pdf_path = generate_pdf(data)
 
-        token = str(uuid.uuid4())
+        token = generate_unique_token()
         download_tokens[token] = {
             "file_path": pdf_path,
             "expires_at": time.time() + 60,  # 60 saniye geçerli
@@ -87,7 +105,14 @@ def secure_download():
 
         # Token kontrolü
         if not token or token not in download_tokens:
-            return jsonify({"error": "Invalid or expired token"}), 403
+            return """
+            <html>
+                <body>
+                    <h2>Invalid or expired token</h2>
+                    <p>The requested link is no longer valid. Please generate a new PDF to download.</p>
+                </body>
+            </html>
+            """, 403
 
         token_data = download_tokens[token]
         file_path = token_data["file_path"]
@@ -95,7 +120,14 @@ def secure_download():
         # Token süresi dolmuş mu?
         if time.time() > token_data["expires_at"]:
             del download_tokens[token]
-            return jsonify({"error": "Token expired"}), 403
+            return """
+            <html>
+                <body>
+                    <h2>Token expired</h2>
+                    <p>The requested link has expired. Please generate a new PDF to download.</p>
+                </body>
+            </html>
+            """, 403
 
         # Dosya adı ve download linki
         filename = os.path.basename(file_path)
@@ -107,20 +139,27 @@ def secure_download():
             <head>
                 <title>Downloading...</title>
                 <script>
+                    // 1 saniye içinde indirmenin başlaması
                     setTimeout(function() {{
                         window.location.href = "{download_link}";
                     }}, 1000);
                 </script>
             </head>
             <body>
-                <h2>Downloading your file...</h2>
-                <p>This link will expire in 60 seconds. If the download doesn't start automatically, <a href="{download_link}">click here</a>.</p>
+                <h2>Your file is downloading...</h2>
+                <p>If the download doesn't start automatically, <a href="{download_link}">click here</a>.</p>
             </body>
         </html>
         """
     except Exception as e:
-        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
-
+        return f"""
+        <html>
+            <body>
+                <h2>An error occurred</h2>
+                <p>{str(e)}</p>
+            </body>
+        </html>
+        """, 500
 
 @app.route('/download-pdf/<filename>', methods=['GET'])
 def download_pdf(filename):
@@ -151,6 +190,7 @@ def download_pdf(filename):
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
 if __name__ == '__main__':
+    threading.Thread(target=clean_expired_tokens, daemon=True).start()
     # Flask uygulamasını HTTPS olmadan çalıştır (Nginx yönetecek)
     port = 8443  # Nginx talepleri bu porta yönlendirecek
     app.run(debug=True, host='0.0.0.0', port=port)
