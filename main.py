@@ -97,9 +97,9 @@ def secure_download():
         print(f"[DEBUG] Token received: {token}")
 
         # Token kontrolü
-        if not token or token not in download_tokens:
+        """if not token or token not in download_tokens:
             print(f"[ERROR] Token invalid or missing: {token}")
-            return jsonify({"error": "Invalid token"}), 403
+            return jsonify({"error": "Invalid token"}), 403"""
 
         token_data = download_tokens[token]
         file_path = token_data["file_path"]
