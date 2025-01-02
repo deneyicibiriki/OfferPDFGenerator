@@ -1,48 +1,98 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 from app.pdf_generator import generate_pdf
 import os
+import traceback
 
-def create_app():
-    """
-    Flask uygulamasını oluşturur ve yapılandırır.
-    """
-    app = Flask(__name__)
-    CORS(app)  # CORS'u etkinleştir
+# Flask uygulamasını doğrudan tanımlayın
+app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
-    @app.route('/generate-pdf', methods=['POST'])
-    def generate_pdf_route():
-        try:
-            data = request.get_json()
+# CORS başlıklarını tüm yanıtlara ekleyen fonksiyon
+@app.after_request
+def add_cors_headers(response):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+    response.headers['Access-Control-Allow-Credentials'] = 'true'
+    return response
 
-            # Eksik veri kontrolü
-            if not data or not data.get("items", []):
-                return jsonify({"error": "Invalid data provided"}), 400
+@app.route('/', methods=['GET'])
+def home():
+    return jsonify({"message": "API is running on HTTPS!"}), 200
 
-            # PDF oluştur
-            print("[DEBUG] JSON Verisi Alındı:", data)
-            pdf_path = generate_pdf(data)
-            pdf_path = generate_pdf(data)
+@app.errorhandler(Exception)
+def handle_exception(e):
+    print(f"[ERROR] Uygulama hatası: {e}")
+    print("[TRACEBACK]")
+    traceback.print_exc()  # Detaylı traceback loglama
+    return jsonify({"error": str(e)}), 500
 
-            if pdf_path.startswith("http"):
-                pdf_url = pdf_path  # Eğer pdf_path tam URL içeriyorsa direkt kullan
-            else:
-                pdf_url = f"https://apideneme.viselab.net/{pdf_path.lstrip('/')}"  # Baştaki "/"'yi kaldır
+@app.route('/generate-pdf', methods=['POST'])
+def generate_pdf_route():
+    try:
+        data = request.get_json()
 
-            return jsonify({
-                "pdf_generated": True,
-                "message": "PDF başarıyla oluşturuldu.",
-                "pdf_path": pdf_url  # WebGL için tam erişim URL'si
-            }), 200
+        if not data or not data.get("items", []):
+            return jsonify({"error": "Invalid data provided"}), 400
 
-        except Exception as e:
-            # Hata durumunda loglama ve hata mesajı
-            return jsonify({"error": f"Hata oluştu: {str(e)}"}), 500
+        # PDF oluştur
+        print("[DEBUG] JSON Verisi Alındı:", data)
+        pdf_path = generate_pdf(data)
+
+        if not pdf_path:
+            print("[ERROR] generate_pdf fonksiyonu boş değer döndürdü.")
+            return jsonify({"error": "PDF oluşturulamadı"}), 500
+
+            # Eğer dosya mevcut değilse hata ver
+        if not os.path.exists(pdf_path):
+            print(f"[ERROR] PDF oluşturulamadı: {pdf_path}")
+            return jsonify({"error": "PDF oluşturulamadı"}), 500
+
+        # PDF URL oluştur
+        pdf_url = f"https://apideneme.viselab.net/download-pdf/{os.path.basename(pdf_path)}"
+        print(f"[DEBUG] Oluşturulan PDF URL: {pdf_url}")
+
+        return jsonify({
+            "pdf_generated": True,
+            "message": "PDF başarıyla oluşturuldu.",
+            "pdf_path": pdf_url
+        }), 200
+
+    except Exception as e:
+        print(f"[ERROR] generate_pdf hatası: {e}")
+        return jsonify({"error": f"Hata oluştu: {str(e)}"}), 500
 
 
+@app.route('/download-pdf/<filename>', methods=['GET'])
+def download_pdf(filename):
+    try:
+        if not filename.endswith('.pdf'):
+            filename += '.pdf'
 
-    return app
+        file_path = os.path.join(os.getcwd(), 'static/generated_offers', filename)
+        print(f"[DEBUG] -----Download pdf fonksiyonu: PDF dosya yolu: {file_path}")
+        if not os.path.exists(file_path):
+            print(f"[ERROR] Dosya bulunamadı: {file_path}")
+            return jsonify({"error": "File not found"}), 404
+
+        print(f"[DEBUG] Dosya indiriliyor: {file_path}")
+        response = send_file(
+            file_path,
+            as_attachment=True,
+            download_name=filename,
+            mimetype="application/pdf"
+        )
+        print(f"[DEBUG] File sent successfully: {file_path}")
+        return response
+
+
+    except Exception as e:
+        print(f"[ERROR] PDF indirme sırasında hata: {e}")
+        traceback.print_exc()
+        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
 if __name__ == '__main__':
-    app = create_app()
-    app.run(debug=True, host='127.0.0.1', port=5000)
+    # Flask uygulamasını HTTPS olmadan çalıştır (Nginx yönetecek)
+    port = 8443  # Nginx talepleri bu porta yönlendirecek
+    app.run(debug=True, host='0.0.0.0', port=port)

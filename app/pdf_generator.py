@@ -117,23 +117,6 @@ def generate_pdf(data):
         except Exception as e:
             print(f"[ERROR] Logo eklenirken hata oluştu: {e}")
 
-        """static_path = os.path.join(os.getcwd(), 'static/assets/logo.png')
-        print("[DEBUG] Logo is being searched.")
-        if os.path.exists(static_path):
-            print(f"[DEBUG] Logo dosya yolu bulundu: {static_path}")
-        else:
-            print(f"[ERROR] Logo dosya yolu bulunamadı: {static_path}")
-
-        try:
-            print(f"[DEBUG] Logo yükleniyor: {static_path}")
-            pdf.image(static_path, x=10, y=8, w=50)  # Logo büyütüldü
-            pdf.set_xy(10, 50)  # Position for text below the logo
-        except FileNotFoundError:
-            print(f"[ERROR] Dosya bulunamadı: {static_path}")
-        except Exception as e:
-            print(f"[ERROR] Logo yüklenirken hata oluştu: {e}")
-            import traceback
-            traceback.print_exc()  # Daha detaylı traceback"""
 
         # F.Reg.
         pdf.set_font("DejaVu", "B", size=10)  # Bold font for label

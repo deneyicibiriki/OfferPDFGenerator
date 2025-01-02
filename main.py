@@ -3,6 +3,9 @@ from flask_cors import CORS
 from app.pdf_generator import generate_pdf
 import os
 import traceback
+import uuid
+import time
+
 
 # Flask uygulamasını doğrudan tanımlayın
 app = Flask(__name__)
@@ -28,6 +31,8 @@ def handle_exception(e):
     traceback.print_exc()  # Detaylı traceback loglama
     return jsonify({"error": str(e)}), 500
 
+download_tokens = {}
+
 @app.route('/generate-pdf', methods=['POST'])
 def generate_pdf_route():
     try:
@@ -40,6 +45,14 @@ def generate_pdf_route():
         print("[DEBUG] JSON Verisi Alındı:", data)
         pdf_path = generate_pdf(data)
 
+        token = str(uuid.uuid4())
+        download_tokens[token] = {
+            "file_path": pdf_path,
+            "expires_at": time.time() + 60,  # 60 saniye geçerli
+        }
+
+
+
         if not pdf_path:
             print("[ERROR] generate_pdf fonksiyonu boş değer döndürdü.")
             return jsonify({"error": "PDF oluşturulamadı"}), 500
@@ -50,18 +63,63 @@ def generate_pdf_route():
             return jsonify({"error": "PDF oluşturulamadı"}), 500
 
         # PDF URL oluştur
-        pdf_url = f"https://apideneme.viselab.net/download-pdf/{os.path.basename(pdf_path)}"
-        print(f"[DEBUG] Oluşturulan PDF URL: {pdf_url}")
+        #pdf_url = f"https://apideneme.viselab.net/download-pdf/{os.path.basename(pdf_path)}"
+        secure_url = f"https://apideneme.viselab.net/secure-download?token={token}"
+        #print(f"[DEBUG] Oluşturulan PDF URL: {pdf_url}")
+        print(f"[DEBUG] Oluşturulan PDF URL: {secure_url}")
 
         return jsonify({
             "pdf_generated": True,
             "message": "PDF başarıyla oluşturuldu.",
-            "pdf_path": pdf_url
+            #"pdf_path": pdf_url
+            "pdf_path": secure_url  # Burada artık secure-download döneceğiz
         }), 200
 
     except Exception as e:
+
         print(f"[ERROR] generate_pdf hatası: {e}")
         return jsonify({"error": f"Hata oluştu: {str(e)}"}), 500
+
+@app.route('/secure-download', methods=['GET'])
+def secure_download():
+    try:
+        token = request.args.get("token")
+
+        # Token kontrolü
+        if not token or token not in download_tokens:
+            return jsonify({"error": "Invalid or expired token"}), 403
+
+        token_data = download_tokens[token]
+        file_path = token_data["file_path"]
+
+        # Token süresi dolmuş mu?
+        if time.time() > token_data["expires_at"]:
+            del download_tokens[token]
+            return jsonify({"error": "Token expired"}), 403
+
+        # Dosya adı ve download linki
+        filename = os.path.basename(file_path)
+        download_link = f"https://apideneme.viselab.net/download-pdf/{filename}"
+
+        # HTML mesajı döndür
+        return f"""
+        <html>
+            <head>
+                <title>Downloading...</title>
+                <script>
+                    setTimeout(function() {{
+                        window.location.href = "{download_link}";
+                    }}, 1000);
+                </script>
+            </head>
+            <body>
+                <h2>Downloading your file...</h2>
+                <p>This link will expire in 60 seconds. If the download doesn't start automatically, <a href="{download_link}">click here</a>.</p>
+            </body>
+        </html>
+        """
+    except Exception as e:
+        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
 
 @app.route('/download-pdf/<filename>', methods=['GET'])
