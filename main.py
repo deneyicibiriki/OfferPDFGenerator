@@ -56,7 +56,7 @@ def generate_pdf_route():
         return jsonify({
             "pdf_generated": True,
             "message": "PDF başarıyla oluşturuldu.",
-            "pdf_url": pdf_url
+            "pdf_path": pdf_url
         }), 200
 
     except Exception as e:
