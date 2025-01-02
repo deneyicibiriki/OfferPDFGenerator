@@ -5,8 +5,30 @@ import re
 
 
 
+def convert_to_float(value):
+    try:
+        # Eğer gelen veri virgüllü ise noktaya çevir
+        if isinstance(value, str) and ',' in value:
+            value = value.replace(',', '.')
+        return float(value)
+    except ValueError as e:
+        print(f"[ERROR] Sayıyı float'a dönüştürürken hata oluştu: {e}")
+        return None
+
 def generate_pdf(data):
     print("[DEBUG] generate_pdf function called.")
+
+    try:
+        # Gelen veriyi kontrol et ve dönüştür
+        for item in data.get("items", []):
+            if "price" in item:  # "price" yerine kendi sayısal alanını yaz
+                item["price"] = convert_to_float(item["price"])
+
+        # Burada PDF oluşturma işlemlerini yap
+        print("[DEBUG] Dönüştürülmüş veri:", data)
+
+    except Exception as e:
+        print(f"[ERROR] PDF oluşturulurken hata oluştu: {e}")
 
     try:
         # Date details
