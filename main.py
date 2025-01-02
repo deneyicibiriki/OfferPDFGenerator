@@ -90,8 +90,8 @@ def generate_pdf_route():
         print(f"[ERROR] generate_pdf hatası: {e}")
         return jsonify({"error": f"Hata oluştu: {str(e)}"}), 500
 
-@app.route('/secure-download', methods=['GET'])
-def secure_download():
+@app.route('/secure-download/<token>', methods=['GET'])
+def secure_download(token):
     try:
         token = request.args.get("token")
         print(f"[DEBUG] Token received: {token}")
