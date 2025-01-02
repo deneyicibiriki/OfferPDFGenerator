@@ -50,7 +50,7 @@ def generate_pdf_route():
         return jsonify({
             "pdf_generated": True,
             "message": "PDF başarıyla oluşturuldu.",
-            "pdf_path": pdf_url
+            "pdf_url": pdf_url
         }), 200
 
     except Exception as e:
@@ -65,6 +65,7 @@ def download_pdf(filename):
             filename += '.pdf'
 
         file_path = os.path.join(os.getcwd(), 'static/generated_offers', filename)
+        print(f"[DEBUG] -----Download pdf fonksiyonu: PDF dosya yolu: {file_path}")
         if not os.path.exists(file_path):
             print(f"[ERROR] Dosya bulunamadı: {file_path}")
             return jsonify({"error": "File not found"}), 404
@@ -76,11 +77,10 @@ def download_pdf(filename):
             download_name=filename,
             mimetype="application/pdf"
         )
-        response.headers["Content-Disposition"] = f"attachment; filename={filename}"
-        return response
 
     except Exception as e:
         print(f"[ERROR] PDF indirme sırasında hata: {e}")
+        traceback.print_exc()
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
 if __name__ == '__main__':

@@ -77,6 +77,8 @@ def generate_pdf(data):
         new_reference_no = f"{max_number + 1:04}"
         reference_number = f"PRE-{customer_character}-MK{new_reference_no}"
         print(f"[DEBUG] Generated reference number: {reference_number}")
+        pdf_filename = f"{reference_number}.pdf"
+        file_path = os.path.join(os.getcwd(), 'static/generated_offers', pdf_filename)
 
         # Add extra details to data
         data["referenceNumber"] = reference_number
@@ -265,8 +267,9 @@ def generate_pdf(data):
 
 
         # Save PDF
-        pdf_file = os.path.join(output_folder, f"{reference_number}.pdf")
-        print(f"[DEBUG] Saving PDF to: {pdf_file}")
+        #pdf_file = os.path.join(output_folder, f"{reference_number}.pdf")
+        #print(f"[DEBUG] Saving PDF to: {pdf_file}")
+
 
         total_pages = pdf.page_no()  # Toplam sayfa sayısını al
         pdf.alias_nb_pages()  # Toplam sayfa sayısını FPDF'ye öğret
@@ -285,21 +288,25 @@ def generate_pdf(data):
 
 
 
-        pdf.output(pdf_file)
+        #pdf.output(pdf_file)
 
-        if not os.path.exists(pdf_file):
-            raise FileNotFoundError(f"PDF file was not created at: {pdf_file}")
+        #if not os.path.exists(pdf_file):
+            #raise FileNotFoundError(f"PDF file was not created at: {pdf_file}")
 
         #pdf_url = f"http://127.0.0.1:5000/static/generated_offers/{reference_number}.pdf"
         #pdf_url = f"{request.host_url}static/generated_offers/{reference_number}.pdf"
-        pdf_url = f"https://apideneme.viselab.net/download-pdf/{reference_number}"
+        #pdf_url = f"https://apideneme.viselab.net/download-pdf/{reference_number}"
 
-        print(f"[DEBUG] PDF URL: {pdf_url}")
+        #print(f"[DEBUG] PDF URL: {pdf_url}")
+        print(f"[DEBUG] PDF dosyası oluşturuldu: {file_path}")
+        return file_path
 
-        return pdf_url
+        #return pdf_url
+
 
 
     except Exception as e:
 
-        print(f"[ERROR] PDF generation error: {e}")
+        print(f"[ERROR] PDF oluşturma sırasında hata: {str(e)}")
+
         raise
