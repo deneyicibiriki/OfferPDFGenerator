@@ -69,19 +69,21 @@ def generate_pdf_route():
 @app.route('/secure-download', methods=['GET'])
 def secure_download():
     try:
-        token = request.args.get("token")
 
-        # Token kontrolü
+        token = request.args.get("token")
         if not token or token not in download_tokens:
             return jsonify({"error": "Invalid or expired token"}), 403
 
         token_data = download_tokens[token]
-        file_path = token_data["file_path"]
-
         # Token süresi dolmuş mu?
         if time.time() > token_data["expires_at"]:
             del download_tokens[token]
             return jsonify({"error": "Token expired"}), 403
+
+        file_path = token_data["file_path"]
+
+        if not os.path.exists(file_path):
+            return jsonify({"error": "File not found"}), 404
 
         # Dosya adı ve download linki
         filename = os.path.basename(file_path)
@@ -115,6 +117,7 @@ def download_pdf(filename):
 
         file_path = os.path.join(os.getcwd(), 'static/generated_offers', filename)
         print(f"[DEBUG] -----Download pdf fonksiyonu: PDF dosya yolu: {file_path}")
+
         if not os.path.exists(file_path):
             print(f"[ERROR] Dosya bulunamadı: {file_path}")
             return jsonify({"error": "File not found"}), 404
