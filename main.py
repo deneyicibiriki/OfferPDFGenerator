@@ -51,7 +51,7 @@ def generate_pdf_route():
         token = str(uuid.uuid4())
         download_tokens[token] = {
             "file_path": pdf_path,
-            "expires_at": time.time() + 60,  # 60 saniye geçerli
+            "expires_at": time.time() + 300,  # 60 saniye geçerli
         }
 
         # Secure-download endpoint URL'si
