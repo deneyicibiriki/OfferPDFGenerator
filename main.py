@@ -46,10 +46,18 @@ def generate_pdf_route():
             return jsonify({"error": "Invalid data provided"}), 400
 
         # PDF dosyasının yolunu oluştur
-        pdf_path = os.path.join(os.getcwd(), 'static/generated_offers/example.pdf')
+        print("[DEBUG] JSON Verisi Alındı:", data)
+        pdf_path = generate_pdf(data)
+
+        if not pdf_path:
+            print("[ERROR] generate_pdf fonksiyonu boş değer döndürdü.")
+            return jsonify({"error": "PDF oluşturulamadı"}), 500
+
         if not os.path.exists(pdf_path):
-            with open(pdf_path, 'w') as f:
-                f.write("Dummy PDF content for testing purposes.")
+            print(f"[ERROR] PDF oluşturulamadı: {pdf_path}")
+            return jsonify({"error": "PDF oluşturulamadı"}), 500
+
+
 
         # JWT Token oluştur (5 dakika geçerli olacak)
         expiration_time = datetime.datetime.utcnow() + datetime.timedelta(minutes=5)
@@ -63,6 +71,7 @@ def generate_pdf_route():
             "message": "PDF başarıyla oluşturuldu.",
             "pdf_path": secure_url
         }), 200
+
 
     except Exception as e:
         return jsonify({"error": f"Hata oluştu: {str(e)}"}), 500
@@ -115,9 +124,15 @@ def secure_download():
 @app.route('/download-pdf/<filename>', methods=['GET'])
 def download_pdf(filename):
     try:
+        if not filename.endswith('.pdf'):
+            filename += '.pdf'
+
         file_path = os.path.join(os.getcwd(), 'static/generated_offers', filename)
         if not os.path.exists(file_path):
+            print(f"[ERROR] Dosya bulunamadı: {file_path}")
             return jsonify({"error": "File not found"}), 404
+
+        print(f"[DEBUG] File sent successfully: {file_path}")
 
         return send_file(
             file_path,
