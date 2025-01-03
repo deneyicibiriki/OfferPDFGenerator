@@ -6,3 +6,4 @@ gunicorn
 fpdf
 fpdf2
 werkzeug
+pyjwt

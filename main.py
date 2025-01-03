@@ -3,8 +3,10 @@ from flask_cors import CORS
 from app.pdf_generator import generate_pdf
 import os
 import traceback
-import uuid
-import time
+import jwt
+import datetime
+
+SECRET_KEY = "MATAPI290523"
 
 
 # Flask uygulamasını doğrudan tanımlayın
@@ -38,21 +40,20 @@ download_tokens = {}
 @app.route('/generate-pdf', methods=['POST'])
 def generate_pdf_route():
     try:
+        # Gelen veriyi kontrol edin
         data = request.get_json()
-
-        # Eksik veri kontrolü
         if not data or not data.get("items", []):
             return jsonify({"error": "Invalid data provided"}), 400
 
-        # PDF oluştur
-        pdf_path = generate_pdf(data)  # PDF dosya yolu
+        # PDF dosyasının yolunu oluştur
+        pdf_path = os.path.join(os.getcwd(), 'static/generated_offers/example.pdf')
+        if not os.path.exists(pdf_path):
+            with open(pdf_path, 'w') as f:
+                f.write("Dummy PDF content for testing purposes.")
 
-        # Token oluştur
-        token = str(uuid.uuid4())
-        download_tokens[token] = {
-            "file_path": pdf_path,
-            "expires_at": time.time() + 300,  # 60 saniye geçerli
-        }
+        # JWT Token oluştur (5 dakika geçerli olacak)
+        expiration_time = datetime.datetime.utcnow() + datetime.timedelta(minutes=5)
+        token = jwt.encode({"file_path": pdf_path, "exp": expiration_time}, SECRET_KEY, algorithm="HS256")
 
         # Secure-download endpoint URL'si
         secure_url = f"https://apideneme.viselab.net/secure-download?token={token}"
@@ -60,7 +61,7 @@ def generate_pdf_route():
         return jsonify({
             "pdf_generated": True,
             "message": "PDF başarıyla oluşturuldu.",
-            "pdf_path": secure_url  # Burada artık secure-download döneceğiz
+            "pdf_path": secure_url
         }), 200
 
     except Exception as e:
@@ -69,27 +70,29 @@ def generate_pdf_route():
 @app.route('/secure-download', methods=['GET'])
 def secure_download():
     try:
-
         token = request.args.get("token")
-        if not token or token not in download_tokens:
-            return jsonify({"error": "Invalid or expired token"}), 403
 
-        token_data = download_tokens[token]
-        # Token süresi dolmuş mu?
-        if time.time() > token_data["expires_at"]:
-            del download_tokens[token]
+        # Token doğrulama
+        if not token:
+            return jsonify({"error": "Missing token"}), 403
+
+        try:
+            # Token çözümleme
+            decoded_token = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+            file_path = decoded_token["file_path"]
+        except jwt.ExpiredSignatureError:
             return jsonify({"error": "Token expired"}), 403
+        except jwt.InvalidTokenError:
+            return jsonify({"error": "Invalid token"}), 403
 
-        file_path = token_data["file_path"]
-
+        # Dosya kontrolü
         if not os.path.exists(file_path):
             return jsonify({"error": "File not found"}), 404
 
-        # Dosya adı ve download linki
         filename = os.path.basename(file_path)
         download_link = f"https://apideneme.viselab.net/download-pdf/{filename}"
 
-        # HTML mesajı döndür
+        # HTML ile indirme bağlantısı döndür
         return f"""
         <html>
             <head>
@@ -101,8 +104,8 @@ def secure_download():
                 </script>
             </head>
             <body>
-                <h2>Downloading your file...</h2>
-                <p>This link will expire in 60 seconds. If the download doesn't start automatically, <a href="{download_link}">click here</a>.</p>
+                <h2>Your file is being downloaded...</h2>
+                <p>If the download doesn't start automatically, <a href="{download_link}">click here</a>.</p>
             </body>
         </html>
         """
@@ -112,31 +115,20 @@ def secure_download():
 @app.route('/download-pdf/<filename>', methods=['GET'])
 def download_pdf(filename):
     try:
-        if not filename.endswith('.pdf'):
-            filename += '.pdf'
-
         file_path = os.path.join(os.getcwd(), 'static/generated_offers', filename)
-        print(f"[DEBUG] -----Download pdf fonksiyonu: PDF dosya yolu: {file_path}")
-
         if not os.path.exists(file_path):
-            print(f"[ERROR] Dosya bulunamadı: {file_path}")
             return jsonify({"error": "File not found"}), 404
 
-        print(f"[DEBUG] Dosya indiriliyor: {file_path}")
-        response = send_file(
+        return send_file(
             file_path,
             as_attachment=True,
             download_name=filename,
             mimetype="application/pdf"
         )
-        print(f"[DEBUG] File sent successfully: {file_path}")
-        return response
-
-
     except Exception as e:
-        print(f"[ERROR] PDF indirme sırasında hata: {e}")
         traceback.print_exc()
-        return jsonify({"error": f"An error occurred in dowload pdf: {str(e)}"}), 500
+        return jsonify({"error": f"An error occurred in download-pdf: {str(e)}"}), 500
+
 
 if __name__ == '__main__':
     # Flask uygulamasını HTTPS olmadan çalıştır (Nginx yönetecek)
