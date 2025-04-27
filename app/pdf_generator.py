@@ -104,7 +104,7 @@ def generate_pdf(data):
 
         # Add header
         # Logo and Company Details on the left
-        """
+
         try:
             # URL üzerinden logo ekleme
             logo_url = "https://apideneme.viselab.net/static/assets/logo.png"
@@ -131,8 +131,8 @@ def generate_pdf(data):
             else:
                 print(f"[ERROR] Logo dosyası bulunamadı: {static_path}")
         except Exception as e:
-            print(f"[ERROR] Logo eklenirken hata oluştu: {e}")
-
+                print(f"[ERROR] Logo eklenirken hata oluştu: {e}")
+        """
         # F.Reg.
         pdf.set_font("DejaVu", "B", size=10)  # Bold font for label
         pdf.cell(20, 5, txt="F.Reg.:", align="L", border=0)  # Label
